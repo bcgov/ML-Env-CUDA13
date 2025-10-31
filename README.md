@@ -115,20 +115,6 @@ ML-Env-CUDA13/
 
 ---
 
-## 7. Author & Credits
-
-**Richard Fremmerlid**
-*Machine Learning + CUDA Developer*
-Built on **October 31, 2025**
-
-> **"From `typing_extensions` errors to full GPU power — in one script."**
-> — *You, after running `setup_ml_env_full.ps1` or `setup_ml_env_wsl.sh`*
-
-**Star this repo** if it saved you hours of dependency hell.
-**Now go train something amazing.**
-
----
-
 ## Software Dependencies (Install First)
 
 > **Warning: These must be installed BEFORE running any script.**
