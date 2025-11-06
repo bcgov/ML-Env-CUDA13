@@ -1,17 +1,4 @@
-"""
-Copyright 2025 British Columbia
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-This file is provided as part of ML-Env-CUDA13. See LICENSE for full
-license text.
-"""
-
-import json
+﻿import json
 import subprocess
 import tensorflow as tf
 
@@ -19,25 +6,30 @@ print(f"TensorFlow: {tf.__version__}")
 gpus = tf.config.list_physical_devices('GPU')
 print(f"GPU Detected: {len(gpus) > 0}")
 for i, gpu in enumerate(gpus):
+    # tf PhysicalDevice doesn't always expose a .name property; repr it instead
     try:
         name = gpu.name
     except Exception:
         name = repr(gpu)
     print(f"GPU {i}: {name}")
 
+# Try to print build-time CUDA/cuDNN info (may be None)
 try:
     build = tf.sysconfig.get_build_info()
-    cuda_build = build.get('cuda_version') or build.get('cuda_version_text') or None
+    # build is a dict containing keys like 'cuda_version' and 'cudnn_version'
+    cuda_build = build.get('cuda_version') or build.get('cuda_version_text') or build.get('cuda_version_major') or None
     cudnn_build = build.get('cudnn_version') or None
     print("TensorFlow build info:")
     print(json.dumps({
         'tf_version': tf.__version__,
         'cuda_build': cuda_build,
         'cudnn_build': cudnn_build,
+        'build_info_sample': {k: build.get(k) for k in ['cuda_version','cudnn_version'] if k in build}
     }, indent=2))
 except Exception as e:
     print("Could not retrieve TensorFlow build info:", e)
 
+# Also run system checks (nvidia-smi, nvcc) if available to report runtime/toolkit versions
 def run_cmd(cmd):
     try:
         out = subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode('utf-8')

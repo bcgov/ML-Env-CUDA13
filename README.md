@@ -17,7 +17,7 @@
 | Environment         | PyTorch GPU | TensorFlow GPU | CUDA Version | Notes |
 |--------------------|:-----------:|:--------------:|:------------:|-------|
 | Windows Native     |     ✅      |      ❌        |   13.0       | Only PyTorch supports GPU. TensorFlow is CPU-only after v2.10. |
-| WSL2 + Ubuntu      |     ✅      |      ✅        |   12.3       | Both PyTorch and TensorFlow support GPU. |
+| WSL2 + Ubuntu      |     ✅      |      ✅        |   12.x (PyTorch runtime 12.1; TF build 12.5.1; nvcc 12.6; host driver reports 13.0) | Both PyTorch and TensorFlow support GPU in WSL2. |
 
 ---
 
@@ -47,9 +47,10 @@ ML-Env-CUDA13/
 - PyTorch: GPU acceleration (CUDA 13.0)
 - TensorFlow: CPU-only (no GPU after v2.10)
 
-#### Setup Steps
+#### Initial Setup Steps
 1. Install dependencies (Visual Studio, NVIDIA Driver, CUDA Toolkit)
 2. Run PowerShell setup script:
+***NOTE:**  you likely might need to turn off cisco to have libraries install
    ```powershell
    .\setup_ml_env_full.ps1
    ```
@@ -58,6 +59,11 @@ ML-Env-CUDA13/
    .\cuda_clean_env\Scripts\Activate
    ```
 4. Run tests and train models as above
+
+#### If you already ran the installer and the venv exists, activate it:
+   ```powershell
+   .\cuda_clean_env\Scripts\Activate
+   ```
 
 #### Limitations
 - TensorFlow GPU not supported after v2.10 *(temporary; future Windows releases may restore support, but currently use WSL2 for TensorFlow GPU)*
@@ -68,10 +74,10 @@ ML-Env-CUDA13/
 ### 4.2. WSL2 + Ubuntu Environment
 
 #### Features
-- PyTorch: GPU acceleration (CUDA 12.3)
-- TensorFlow: GPU acceleration (CUDA 12.3)
+- PyTorch: GPU acceleration (CUDA 12.x — PyTorch runtime 12.1 observed)
+- TensorFlow: GPU acceleration (TensorFlow build reports CUDA 12.5.1 in current tests)
 
-#### Setup Steps
+#### Initial Setup Steps
 1. Enable Windows Features:
    - `Virtual Machine Platform` and `Windows Subsystem for Linux`
    - Reboot
@@ -82,6 +88,7 @@ ML-Env-CUDA13/
    ```
 3. Launch Ubuntu and create user account
 4. Run bash setup script:
+***NOTE:**  you likely might need to turn off cisco to have libraries install
    ```bash
    bash setup_ml_env_wsl.sh
    ```
@@ -91,9 +98,20 @@ ML-Env-CUDA13/
    ```
 6. Run tests and train models as above
 
-#### Notes
-- PyTorch and TensorFlow both use CUDA 12.3 in WSL2
-- Full GPU support for both libraries
+#### If you already ran the installer and the venv exists, activate it:
+  ```bash
+  source ~/ml_env/bin/activate
+  ```
+
+- PyTorch and TensorFlow both use CUDA 12.x in WSL2, but minor version components can differ between the frameworks, the system compiler, and the host driver. In current tests we observed:
+
+- PyTorch runtime: 12.1 (built as `+cu121`)
+- TensorFlow build: 12.5.1
+- nvcc (toolkit on WSL): 12.6
+- Host driver (Windows): reports CUDA Version 13.0 via `nvidia-smi` (driver 581.42)
+
+Minor mismatches between build-time CUDA, runtime CUDA, and system nvcc are common; always consult the test outputs (the setup script prints a JSON-like verification block) or `requirements-wsl.txt` for the exact versions present in your environment.
+ - Full GPU support for both libraries
 
 ---
 
@@ -187,3 +205,21 @@ To ensure reproducibility and compatibility, use separate requirements files for
 - Document this in your README so users know which file to use.
 
 ---
+
+## License
+
+This repository is licensed under the Apache License, Version 2.0.
+See the full license text in the `LICENSE` file included at the repository root.
+
+By contributing to this repository you agree to license your contributions
+under the same license. See `CONTRIBUTING.md` for contribution guidance and
+`CODE_OF_CONDUCT.md` for expected community behaviour.
+
+---
+
+Apache License (short notice)
+
+© 2025 British Columbia — Licensed under the Apache License, Version 2.0.
+See `LICENSE` for details and the full text. When reusing code from this
+repository, include the Apache-2.0 header in source files as shown in
+`test_pytorch.py` and `test_tensorflow.py`.
