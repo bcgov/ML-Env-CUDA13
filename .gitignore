@@ -1,6 +1,8 @@
 # Ignore Python virtual environments
 cuda_clean_env/
 ml_env/
+ml_env_logs/
+requirements-gpu-postinstall.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -12,6 +14,8 @@ __pycache__/
 # VS Code settings
 .vscode/
 
+*.bak
+
 # OS files
 .DS_Store
 Thumbs.db
@@ -21,3 +25,6 @@ Thumbs.db
 
 # Environment files
 .env
+
+# Pinned requirement snapshots created by setup scripts
+pinned-requirements-*.txt

@@ -1,16 +1,3 @@
-"""
-Copyright 2025 British Columbia
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-This file is provided as part of ML-Env-CUDA13. See LICENSE for full
-license text.
-"""
-
 import json
 import subprocess
 import torch
@@ -49,10 +36,6 @@ build_info = {
     'torch_version': torch.__version__,
     'cuda_build': cuda_build,
     'cudnn_build': cudnn_build,
-    'build_info_sample': {
-        'cuda_version': cuda_build,
-        'cudnn_version': cudnn_build,
-    }
 }
 
 print("\nPyTorch build info:")
