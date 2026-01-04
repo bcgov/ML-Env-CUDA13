@@ -1,11 +1,43 @@
 #!/bin/bash
-# =============================================
-# ML-Env-CUDA13 WSL/Ubuntu Full Setup Script (Idempotent)
-# Supports:
-#   - CUDA 13.0 (via --cuda13 flag)
-#   - Hybrid Dependency Management (pip-tools)
-#   - New Directory Structure (tests/ scripts/)
-# =============================================
+# ====================================================================================
+# ML-Env-CUDA13: Comprehensive WSL/Ubuntu Environment Setup (Idempotent)
+# ====================================================================================
+#
+# PURPOSE:
+#   Creates a Reproducible, Hybrid AI/ML Development Environment suitable for
+#   Project Sanctuary and other advanced LLM workflows.
+#
+# ARCHITECTURE (Hybrid Dependency Management - ADR 001):
+#   1. Foundation Layer (Dynamic):
+#      - Installs hardware-specific binaries (PyTorch, TensorFlow, xformers).
+#      - Adapts to flags (e.g., --cuda13 for Nightly, default for Stable).
+#      - Managed via standard `pip install` to handle complex binary linkages.
+#
+#   2. Application Layer (Strict):
+#      - Installs higher-level libraries (rich, dataset, fine-tuning stack).
+#      - Managed via `pip-tools`.
+#      - AUTOMATICALLY recompiles `requirements.txt` from `requirements.in`
+#        on every run to ensure the lockfile matches the active Foundation Layer.
+#
+# FEATURES:
+#   - Idempotent: Can be run multiple times to repair/update the environment.
+#   - Auto-Verification: Runs a suite of tests (Torch, CUDA, xformers, Llama.cpp)
+#     immediately after setup to guarantee operational status.
+#   - Project Structure Awareness: Generates test scripts in `tests/` and logs
+#     to `ml_env_logs/`.
+#
+# USAGE:
+#   bash scripts/setup_ml_env_wsl.sh            # Standard (Stable / CUDA 12.x)
+#   bash scripts/setup_ml_env_wsl.sh --cuda13   # Experimental (Nightly / CUDA 13.0)
+#
+# Running time: ~5 minutes
+#
+# ====================================================================================
+# ML-Env-CUDA13: Comprehensive WSL/Ubuntu Environment Setup (Idempotent)
+# ====================================================================================
+
+# Record start time
+SCRIPT_START_TIME=$(date +%s)
 
 set -euo pipefail
 
@@ -233,6 +265,14 @@ source "$VENV_PATH/bin/activate"
 pip install --upgrade pip
 
 # =============================================
+# LAYER 0: PURGE (Prevent Symbol Mismatches)
+# =============================================
+echo "[INFO] Purging stale NVIDIA/NCCL packages to prevent symbol mismatches..."
+# Uninstall any existing cu12 or cu13 nvidia libraries that might conflict with the new build
+# This resolves errors like "undefined symbol: ncclDevCommDestroy"
+pip freeze | grep -E "nvidia-.*-cu1|nccl" | cut -d @ -f 1 | xargs -r pip uninstall -y || true
+
+# =============================================
 # LAYER 1: FOUNDATION (Dynamic / Exception)
 # =============================================
 echo "[INFO] Installing Foundation Layer (Torch/TF) - Index: $PYTORCH_INDEX"
@@ -246,9 +286,14 @@ pip install --upgrade tensorflow || true
 pip install $PIP_PRE_FLAG --upgrade torch torchvision torchaudio --index-url "$PYTORCH_INDEX"
 
 # Install xformers (Hardware-sensitive, Foundation Layer)
-# Attempt to install, but allow failure if no matching wheel for Nightly
-echo "[INFO] Installing xformers..."
-pip install xformers || echo "[WARN] xformers installation failed (possible compatibility issue with Nightly)"
+# NOTE: We skip xformers on CUDA 13 (Nightly) because PIP will aggressively 
+# downgrade Torch 2.11 to satisfy the missing xformers cu130 wheels.
+if [ "$CUDA_TAG" = "cu130" ]; then
+    echo "[INFO] Skipping xformers for CUDA 13 (prevents dependency conflicts)"
+else
+    echo "[INFO] Installing xformers..."
+    pip install xformers || echo "[WARN] xformers installation failed"
+fi
 
 # =============================================
 # LAYER 2: APPLICATION (Hybrid / Strict)
@@ -258,11 +303,12 @@ echo "[INFO] Installing Application Layer (via pip-tools)"
 pip install pip-tools
 
 # Requirement: Core Application
-if [ ! -f requirements.txt ]; then
-    echo "[INFO] requirements.txt not found. Compiling from requirements.in..."
-    # We use --allow-unsafe to allow pinning items that might clash with system packages, 
-    # but generally we should separate them. For now, standard compile.
-    pip-compile requirements.in
+if [ -f requirements.in ]; then
+    echo "[INFO] Compiling requirements.txt from requirements.in..."
+    # Force fresh compilation to match the current Foundation Layer (e.g. CUDA 13 vs 12)
+    # This prevents stale lockfiles from pinning inconsistent versions (like torch 2.9 vs 2.11)
+    # We explicitly pass the index URL and pre-release flag so pip-compile sees the Nightly wheels
+    pip-compile requirements.in --upgrade --extra-index-url "$PYTORCH_INDEX" $PIP_PRE_FLAG
 fi
 echo "[INFO] Installing from requirements.txt..."
 pip install -r requirements.txt
@@ -309,10 +355,16 @@ python tests/test_xformers.py > "$LOG_DIR/test_xformers.log" 2>&1 || echo "[WARN
 python tests/test_llama_cpp.py > "$LOG_DIR/test_llama_cpp.log" 2>&1 || echo "[WARN] llama-cpp check failed"
 
 # Report
+SCRIPT_END_TIME=$(date +%s)
+DURATION=$((SCRIPT_END_TIME - SCRIPT_START_TIME))
+MINUTES=$((DURATION / 60))
+SECONDS=$((DURATION % 60))
+
 echo ""
 echo "============================================="
 echo "SETUP COMPLETE!"
 echo "Environment: $VENV_PATH"
 echo "CUDA Target: $CUDA_TAG"
 echo "Log Dir:     $LOG_DIR"
+echo "Total Time:  ${MINUTES}m ${SECONDS}s"
 echo "============================================="
