@@ -162,6 +162,7 @@ This repository follows a **Hybrid Dependency Policy** (ADR 001):
     bash scripts/setup_ml_env_wsl.sh
     ```
     *   It will automatically compile `requirements.txt` and sync your environment.
+    *   **Automatic Refresh:** The script now automatically recompiles `requirements.txt` on every run to ensure the Application Layer remains consistent with the Foundation Layer (e.g., preventing Torch version conflicts).
     *   Do **not** edit `requirements.txt` manually.
 
 ### Windows Native
@@ -222,6 +223,7 @@ ls ../llama.cpp/build/bin/llama-cli
 |------|-----|
 | `Activate.ps1` blocked | Run `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser` |
 | `CUDA not available` | Check `nvidia-smi`, restart PC |
+| `ImportError: undefined symbol: ncclDevCommDestroy` | (Fixed) Run `setup_ml_env_wsl.sh` again. The script now purges conflicting `nvidia-*-cu12` packages. |
 | Install fails | Run `python -m pip install ...` |
 
 ---

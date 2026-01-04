@@ -7,10 +7,28 @@ pillow
 requests
 packaging
 
+# --- Model Management ---
+huggingface_hub==0.25.2
+transformers==4.40.0
+
+# --- Fine-Tuning (Forge) ---
+psutil>=5.9.0
+peft==0.10.0
+trl==0.8.6
+datasets==2.19.0
+accelerate==0.29.3
+pyyaml>=6.0
+
 # --- LLM / Inference ---
 llama-cpp-python
-xformers
 bitsandbytes
+
+# --- Phase 4: Merge & GGUF Conversion ---
+gguf>=0.6.0
+sentencepiece>=0.1.99
+
+# --- Configuration / Utilities ---
+python-dotenv>=1.0.0
 
 # --- UI / Tools ---
 rich
