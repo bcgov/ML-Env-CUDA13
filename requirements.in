@@ -8,15 +8,15 @@ requests
 packaging
 
 # --- Model Management ---
-huggingface_hub>=0.20.0
-transformers>=4.48.0
+huggingface_hub==0.25.2
+transformers==4.40.0
 
 # --- Fine-Tuning (Forge) ---
 psutil>=5.9.0
-peft>=0.7.0
-trl>=0.7.0
-datasets>=2.16.0
-accelerate>=0.25.0
+peft==0.10.0
+trl==0.8.6
+datasets==2.19.0
+accelerate==0.29.3
 pyyaml>=6.0
 
 # --- LLM / Inference ---
