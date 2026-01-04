@@ -26,10 +26,12 @@
 
 ## 2. GPU Support Matrix
 
+## 2. GPU Support Matrix
+
 | Environment         | PyTorch GPU | TensorFlow GPU | CUDA Version | Notes |
 |--------------------|:-----------:|:--------------:|:------------:|-------|
-| Windows Native     |     ✅      |      ❌        |   13.0       | Only PyTorch supports GPU. TensorFlow is CPU-only after v2.10. |
-| WSL2 + Ubuntu      |     ✅      |      ✅        |   12.x (nvcc 12.6; host driver reports 13.0) — runtime components observed: PyTorch 2.9.0+cu128, TensorFlow 2.20.0 | Both PyTorch and TensorFlow support GPU in WSL2. |
+| Windows Native     |     ✅      |      ❌        |   13.0       | Only PyTorch supports GPU (System CUDA). TensorFlow is CPU-only. **Legacy support only.** |
+| WSL2 + Ubuntu      |     ✅      |      ✅        |   12.x **OR** 13.0 | **Primary Env.** Supports stable (`cu126`) or Nightly (`cu130` via `--cuda13` flag). TF works in both. |
 
 ---
 
@@ -37,9 +39,12 @@
 
 ```
 ML-Env-CUDA13/
+├── docs/                          ← Project Documentation & Reports
+│   ├── adr/                       ← Architectural Decision Records
+│   └── ml_env_cuda13_upgrade_report.md
 ├── scripts/
-│   ├── setup_ml_env_full.ps1      ← Windows setup script
-│   └── setup_ml_env_wsl.sh        ← WSL2/Ubuntu setup script
+│   ├── setup_ml_env_full.ps1      ← Windows setup script (Legacy/Limited)
+│   └── setup_ml_env_wsl.sh        ← WSL2/Ubuntu setup script (Primary)
 ├── tests/                         ← Verification scripts (pytorch, tensorflow, etc.)
 ├── cuda_clean_env/                ← Virtual environment (Windows)
 ├── ml_env_logs/                   ← Logs
@@ -47,8 +52,7 @@ ML-Env-CUDA13/
 ├── requirements.in                ← Application application dependencies (WSL)
 ├── requirements-dev.in            ← Dev tools (WSL)
 ├── requirements.txt               ← Pinned application lockfile (WSL)
-├── requirements-wsl.txt           ← Legacy/Exported snapshot
-└── README.md                      ← Main documentation
+├── README.md                      ← Main documentation
 ```
 
 - Run tests:

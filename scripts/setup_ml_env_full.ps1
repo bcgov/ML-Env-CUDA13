@@ -1,3 +1,18 @@
+<#
+.SYNOPSIS
+    Windows Native Setup Script for ML-Env-CUDA13
+    
+.DESCRIPTION
+    Sets up the Python environment for Windows Native.
+    
+    IMPORTANT: 
+    This script is NOT the primary development path for Deep Learning in this repo.
+    - TensorFlow GPU is NOT supported on Windows Native (CPU only).
+    - PyTorch uses system CUDA but full "Nightly" alignment (CUDA 13) is better supported in WSL2.
+    - For the full experience (Hybrid Dependency Policy, pip-tools, TF-GPU), please use WSL2 and `scripts/setup_ml_env_wsl.sh`.
+    
+    See README.md for details.
+#>
 param(
     [switch]$RegenTestsOnly
 )
@@ -150,7 +165,8 @@ python -m pip install --upgrade pip
 Write-Host 'Installing Foundation Layer (PyTorch cu130)...' -ForegroundColor Green
 try {
     pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu130
-} catch {
+}
+catch {
     Write-Host 'WARN: PyTorch install failed or partial; script will continue to verification.' -ForegroundColor Yellow
 }
 
@@ -180,7 +196,8 @@ try {
     $snap = Join-Path $ArchiveDir ("pinned-requirements-{0}.txt" -f (Get-Date -Format yyyyMMddHHmm))
     pip freeze > $snap
     Write-Host "Created snapshot: $snap" -ForegroundColor Green
-} catch {
+}
+catch {
     Write-Host "ERROR: PyTorch verification failed. See $LogDir\test_pytorch.log" -ForegroundColor Red
     exit 1
 }
