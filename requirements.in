@@ -1,0 +1,17 @@
+# Application Layer Dependencies
+# Note: Foundation packages (torch, tensorflow, nvidia-*) are managed by setup_ml_env_wsl.sh
+
+# --- ML Essentials ---
+numpy
+pillow
+requests
+packaging
+
+# --- LLM / Inference ---
+llama-cpp-python
+xformers
+bitsandbytes
+
+# --- UI / Tools ---
+rich
+markdown-it-py
