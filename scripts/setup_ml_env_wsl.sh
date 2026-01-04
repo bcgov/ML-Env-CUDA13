@@ -245,6 +245,11 @@ pip install --upgrade tensorflow || true
 # Uses $PIP_PRE_FLAG (e.g., --pre) if CUDA 13 is requested
 pip install $PIP_PRE_FLAG --upgrade torch torchvision torchaudio --index-url "$PYTORCH_INDEX"
 
+# Install xformers (Hardware-sensitive, Foundation Layer)
+# Attempt to install, but allow failure if no matching wheel for Nightly
+echo "[INFO] Installing xformers..."
+pip install xformers || echo "[WARN] xformers installation failed (possible compatibility issue with Nightly)"
+
 # =============================================
 # LAYER 2: APPLICATION (Hybrid / Strict)
 # =============================================

@@ -9,10 +9,18 @@ packaging
 
 # --- Model Management ---
 huggingface_hub>=0.20.0
+transformers>=4.48.0
+
+# --- Fine-Tuning (Forge) ---
+psutil>=5.9.0
+peft>=0.7.0
+trl>=0.7.0
+datasets>=2.16.0
+accelerate>=0.25.0
+pyyaml>=6.0
 
 # --- LLM / Inference ---
 llama-cpp-python
-xformers
 bitsandbytes
 
 # --- UI / Tools ---
