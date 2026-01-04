@@ -32,21 +32,23 @@ We will adopt a **Hybrid Dependency Management Strategy** that splits the enviro
     *   **Installation:** Installed *after* the Foundation layer.
     *   **Isolation:** The lockfile generation *must* assume the Foundation is present (or use `--unsafe-package` to ignore foundation conflicts if necessary, though prefer layering).
 
-## detailed Workflow
+## Detailed Workflow
 
-1.  **Bootstrap:**
+1.  **Operation:**
+    Run the setup script (which is now Idempotent and Automating):
     ```bash
-    bash setup_ml_env_wsl.sh --cuda13
-    # Installs python, creates venv, installs Foundation (Torch cu130)
+    bash scripts/setup_ml_env_wsl.sh --cuda13
     ```
 
-2.  **Application Install:**
-    The setup script will automatically execute:
-    ```bash
-    pip install pip-tools
-    pip-compile requirements.in  # If .txt is missing
-    pip install -r requirements.txt
-    ```
+2.  **Internal Execution Logic:**
+    The script performs the following steps automatically:
+    *   **Phase A: Foundation (Exception Layer):** Detects flags (e.g., `--cuda13`) and installs the correct `torch`/`tensorflow` / `nvidia-*` base.
+    *   **Phase B: Tooling:** Installs `pip-tools`.
+    *   **Phase C: Application (Strict Layer):**
+        *   Checks `requirements.in`.
+        *   *Automatically* runs `pip-compile requirements.in` if `requirements.txt` is missing.
+        *   Installs from the pinned `requirements.txt`.
+
 
 ## Consequences
 *   **Positive:** We achieve reproducibility for the complex application stack while retaining the flexibility needed for the fragile GPU/Driver stack.
