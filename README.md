@@ -46,7 +46,7 @@ ML-Env-CUDA13/
 │   ├── setup_ml_env_full.ps1      ← Windows setup script (Legacy/Limited)
 │   └── setup_ml_env_wsl.sh        ← WSL2/Ubuntu setup script (Primary)
 ├── tests/                         ← Verification scripts (pytorch, tensorflow, etc.)
-├── cuda_clean_env/                ← Virtual environment (Windows)
+├── cuda_clean_env/                ← Local virtual environment (Windows Only - Legacy)
 ├── ml_env_logs/                   ← Logs
 ├── archive/                       ← Old pinned requirements
 ├── requirements.in                ← Application application dependencies (WSL)
@@ -55,10 +55,14 @@ ML-Env-CUDA13/
 ├── README.md                      ← Main documentation
 ```
 
+**Note:** On WSL, the environment is created at `~/ml_env` (outside the repo) to avoid file permission issues.
+
 - Run tests:
    - Core GPU verification (required):
       - WSL: `python tests/test_torch_cuda.py`
       - Windows/PowerShell: `python tests/test_pytorch.py`
+   - Phase 4 Dependencies (GGUF/SentencePiece):
+      - WSL: `python tests/test_phase4_deps.py`
    - Additional checks (optional): `python tests/test_tensorflow.py`, `python tests/test_xformers.py`, `python tests/test_llama_cpp.py`
    - Regenerate test scripts without installing packages:
       - WSL: `bash scripts/setup_ml_env_wsl.sh --regen-tests-only`
@@ -138,6 +142,7 @@ Observed examples from test runs:
 Notes and guidance:
 
 - Minor mismatches between build-time CUDA, runtime CUDA, and system nvcc are common and usually benign as long as the runtime reports GPU availability.
+- **Performance Tip:** Always clone repositories and create virtual environments within the Linux native filesystem (e.g., `~/repos/`) rather than the Windows mount (`/mnt/c/...`). Accessing `/mnt/c/` from WSL2 introduces significant file I/O overhead which slows down git operations and python imports.
 - The definitive verification is the core GPU test(s) included in this repo — the installer writes their output into `ml_env_logs/` and only snapshots the environment (`pinned-requirements-<timestamp>.txt`) after the core gate passes.
 - Important artifacts to consult or attach to PRs:
    - `ml_env_logs/test_torch_cuda.log` (WSL) or `ml_env_logs/test_pytorch.log` (PowerShell): core gate logs
