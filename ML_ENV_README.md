@@ -1,4 +1,4 @@
-﻿# ML-Env-CUDA13 (Quick Reference)
+# ML-Env-CUDA13 (Quick Reference)
 
 **GPU**: NVIDIA RTX 2000 Ada Generation Laptop GPU
 **Supported Modes**:
@@ -17,6 +17,9 @@ python tests/test_torch_cuda.py
 
 # Application Verification
 python tests/test_llama_cpp.py
+
+# Phase 4 Verification (GGUF/SentencePiece)
+python tests/test_phase4_deps.py
 ```
 
 ## Reinstall / Update

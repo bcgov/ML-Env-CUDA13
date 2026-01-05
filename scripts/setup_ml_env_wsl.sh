@@ -241,23 +241,37 @@ echo "[INFO] Updating system packages..."
 sudo apt update && sudo apt upgrade -y
 
 # 2. Install Python 3.11 and pip
-echo "[INFO] Installing Python 3.11..."
-sudo apt install software-properties-common -y
-if ! grep -q deadsnakes /etc/apt/sources.list /etc/apt/sources.list.d/* 2>/dev/null; then
-    sudo add-apt-repository ppa:deadsnakes/ppa -y
-    sudo apt update
+# 2. Install Python 3.11 and pip (Only if using default 3.11 or if explicit 3.11 requested)
+if [[ "${PYTHON_BIN:-python3.11}" == *"python3.11"* ]]; then
+    echo "[INFO] Ensuring Python 3.11 is installed..."
+    # Attempt to install, but don't fail hard if sudo is interactive-only and we have the binary
+    if command -v python3.11 >/dev/null 2>&1; then
+        echo "[INFO] python3.11 already exists, skipping apt install to avoid sudo prompts if possible."
+    else
+        sudo apt install software-properties-common -y
+        if ! grep -q deadsnakes /etc/apt/sources.list /etc/apt/sources.list.d/* 2>/dev/null; then
+            sudo add-apt-repository ppa:deadsnakes/ppa -y
+            sudo apt update
+        fi
+        sudo apt install python3.11 python3.11-venv python3-pip python3.11-dev -y
+    fi
+else
+    echo "[INFO] Custom Python binary specified ($PYTHON_BIN). Skipping system Python 3.11 install."
 fi
-sudo apt install python3.11 python3.11-venv python3-pip python3.11-dev -y
 
 # 3. Environment Creation
 # Use $HOME/ml_env for portability
-VENV_PATH="$HOME/ml_env"
+# 3. Environment Creation
+# Use $HOME/ml_env for portability, or override with ML_ENV_PATH
+VENV_PATH="${ML_ENV_PATH:-$HOME/ml_env}"
+PYTHON_BIN="${PYTHON_BIN:-python3.11}"
+
 if [ -d "$VENV_PATH" ]; then
     echo "[INFO] Removing existing virtualenv at $VENV_PATH"
     rm -rf "$VENV_PATH"
 fi
-echo "[INFO] Creating venv at $VENV_PATH"
-python3.11 -m venv "$VENV_PATH"
+echo "[INFO] Creating venv at $VENV_PATH using $PYTHON_BIN"
+$PYTHON_BIN -m venv "$VENV_PATH"
 # shellcheck source=/dev/null
 source "$VENV_PATH/bin/activate"
 
